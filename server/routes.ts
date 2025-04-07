@@ -5,27 +5,94 @@ import { ZodError } from "zod";
 import { contractInputSchema } from "@shared/schema";
 import { analyzeContract } from "./analyzer";
 import { fromZodError } from "zod-validation-error";
+import WebSocket from "ws";
+
+// Keep track of analysis jobs
+interface AnalysisJob {
+  id: string;
+  progress: number;
+  status: 'pending' | 'analyzing' | 'completed' | 'failed';
+  startTime: number;
+  result?: any;
+  error?: string;
+}
+
+const analysisJobs = new Map<string, AnalysisJob>();
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // prefix all routes with /api
   
-  // Endpoint to analyze smart contract
+  // Endpoint to analyze smart contract (streaming version with progress updates)
   app.post("/api/analyze", async (req, res) => {
     try {
       const input = contractInputSchema.parse(req.body);
       
-      const startTime = Date.now();
-      const result = await analyzeContract(input);
-      const duration = Date.now() - startTime;
+      // Create a unique job ID
+      const jobId = `job_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
       
-      // Store the analysis result
-      const analysisResult = await storage.saveAnalysisResult({
-        ...result,
-        scanTime: new Date(),
-        scanDuration: duration
+      // Initialize the job
+      analysisJobs.set(jobId, {
+        id: jobId,
+        progress: 0,
+        status: 'pending',
+        startTime: Date.now()
       });
       
-      return res.json({ success: true, result: analysisResult });
+      // Return the job ID immediately
+      res.json({ success: true, jobId });
+      
+      // Process the contract analysis asynchronously
+      setTimeout(async () => {
+        try {
+          analysisJobs.set(jobId, {
+            ...analysisJobs.get(jobId)!,
+            status: 'analyzing',
+            progress: 10
+          });
+          
+          // Simulate gradual progress - in a real implementation, the analyzer would report progress
+          const progressUpdates = [25, 40, 60, 75, 90];
+          progressUpdates.forEach((progress, index) => {
+            setTimeout(() => {
+              const job = analysisJobs.get(jobId);
+              if (job && job.status === 'analyzing') {
+                analysisJobs.set(jobId, {
+                  ...job,
+                  progress
+                });
+              }
+            }, (index + 1) * 800); // Update progress every 800ms
+          });
+          
+          // Actually analyze the contract
+          const startTime = Date.now();
+          const result = await analyzeContract(input);
+          const duration = Date.now() - startTime;
+          
+          // Store the analysis result
+          const analysisResult = await storage.saveAnalysisResult({
+            ...result,
+            scanTime: new Date(),
+            scanDuration: duration
+          });
+          
+          // Update job with completed status and result
+          analysisJobs.set(jobId, {
+            ...analysisJobs.get(jobId)!,
+            status: 'completed',
+            progress: 100,
+            result: analysisResult
+          });
+        } catch (error) {
+          console.error("Error analyzing contract:", error);
+          analysisJobs.set(jobId, {
+            ...analysisJobs.get(jobId)!,
+            status: 'failed',
+            error: error instanceof Error ? error.message : "Unknown error occurred"
+          });
+        }
+      }, 500);
+      
     } catch (error) {
       if (error instanceof ZodError) {
         return res.status(400).json({ 
@@ -40,6 +107,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: error instanceof Error ? error.message : "Unknown error occurred" 
       });
     }
+  });
+  
+  // Endpoint to check analysis progress
+  app.get("/api/analyze/status/:jobId", (req, res) => {
+    const { jobId } = req.params;
+    const job = analysisJobs.get(jobId);
+    
+    if (!job) {
+      return res.status(404).json({ success: false, error: "Analysis job not found" });
+    }
+    
+    if (job.status === 'completed') {
+      return res.json({ success: true, status: job.status, progress: 100, result: job.result });
+    }
+    
+    if (job.status === 'failed') {
+      return res.json({ success: false, status: job.status, error: job.error });
+    }
+    
+    return res.json({ success: true, status: job.status, progress: job.progress });
   });
   
   // Endpoint to get analysis result by ID

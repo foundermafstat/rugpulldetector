@@ -1,52 +1,97 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { ShieldAlert } from "lucide-react";
-import { useState } from "react";
+import { ShieldAlert, Menu } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ThemeSwitch } from "./theme-switch";
+import { WalletConnect } from "@/components/wallet/wallet-connect";
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 10;
+      if (isScrolled !== scrolled) {
+        setScrolled(isScrolled);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [scrolled]);
+
+  if (!mounted) return null;
 
   return (
-    <nav className="bg-primary text-white shadow-md">
+    <header 
+      className={`sticky top-0 z-40 w-full border-b bg-background transition-all ${
+        scrolled ? "border-border shadow-sm" : "border-transparent"
+      }`}
+    >
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <Link href="/">
           <a className="flex items-center space-x-2">
-            <ShieldAlert className="h-8 w-8 text-secondary" />
-            <h1 className="text-xl font-bold">RugPull Detector</h1>
+            <ShieldAlert className="h-8 w-8 text-primary" />
+            <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              RugScan
+            </h1>
           </a>
         </Link>
         
-        <div className="hidden md:flex items-center space-x-4">
-          <Link href="/documentation">
-            <a className="hover:text-gray-300">Documentation</a>
+        <div className="hidden md:flex items-center space-x-6">
+          <Link href="/">
+            <a className="text-sm font-medium transition-colors hover:text-primary">
+              Home
+            </a>
           </Link>
-          <a href="#" className="hover:text-gray-300">API</a>
-          <Button variant="destructive" className="bg-secondary hover:bg-opacity-90">
-            Sign In
-          </Button>
+          <Link href="/documentation">
+            <a className="text-sm font-medium transition-colors hover:text-primary">
+              Documentation
+            </a>
+          </Link>
+          
+          <div className="flex items-center space-x-4">
+            <ThemeSwitch />
+            <WalletConnect />
+          </div>
         </div>
         
-        <button 
-          className="md:hidden"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
-          </svg>
-        </button>
+        <div className="flex items-center space-x-2 md:hidden">
+          <ThemeSwitch />
+          
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
       
       {isMobileMenuOpen && (
-        <div className="md:hidden px-4 py-2 bg-primary border-t border-gray-700">
-          <Link href="/documentation">
-            <a className="block py-2 hover:text-gray-300">Documentation</a>
-          </Link>
-          <a href="#" className="block py-2 hover:text-gray-300">API</a>
-          <Button variant="destructive" className="mt-2 w-full bg-secondary hover:bg-opacity-90">
-            Sign In
-          </Button>
+        <div className="md:hidden px-4 py-4 border-t">
+          <div className="flex flex-col space-y-3">
+            <Link href="/">
+              <a className="py-2 hover:text-primary">Home</a>
+            </Link>
+            <Link href="/documentation">
+              <a className="py-2 hover:text-primary">Documentation</a>
+            </Link>
+            
+            <div className="pt-2">
+              <WalletConnect />
+            </div>
+          </div>
         </div>
       )}
-    </nav>
+    </header>
   );
 }

@@ -7,10 +7,12 @@ import Home from "@/pages/home";
 import Documentation from "@/pages/documentation";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Web3Provider } from "@/components/wallet/web3-provider";
 
 function Router() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       <main className="flex-grow">
         <Switch>
@@ -26,10 +28,14 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router />
-      <Toaster />
-    </QueryClientProvider>
+    <ThemeProvider defaultTheme="dark">
+      <Web3Provider>
+        <QueryClientProvider client={queryClient}>
+          <Router />
+          <Toaster />
+        </QueryClientProvider>
+      </Web3Provider>
+    </ThemeProvider>
   );
 }
 
