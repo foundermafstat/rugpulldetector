@@ -12,9 +12,10 @@ import { Loader } from "lucide-react";
 interface ContractInputPanelProps {
   onAnalysisStart: () => void;
   onAnalysisComplete: (result: AnalysisResult) => void;
+  onJobIdReceived?: (jobId: string) => void;
 }
 
-export default function ContractInputPanel({ onAnalysisStart, onAnalysisComplete }: ContractInputPanelProps) {
+export default function ContractInputPanel({ onAnalysisStart, onAnalysisComplete, onJobIdReceived }: ContractInputPanelProps) {
   const [contractCode, setContractCode] = useState<string>("");
   const [contractAddress, setContractAddress] = useState<string>("");
   const [options, setOptions] = useState({
@@ -28,8 +29,49 @@ export default function ContractInputPanel({ onAnalysisStart, onAnalysisComplete
   // Mutation for analyzing contract
   const analyzeMutation = useMutation({
     mutationFn: async (data: ContractInput) => {
+      // Step 1: Submit the job
       const res = await apiRequest("POST", "/api/analyze", data);
-      return res.json();
+      const initialResponse = await res.json();
+      
+      if (!initialResponse.success || !initialResponse.jobId) {
+        throw new Error(initialResponse.error || "Failed to start analysis");
+      }
+      
+      // Step 2: Poll for job completion
+      const jobId = initialResponse.jobId;
+      
+      // Notify parent component about the new job ID
+      if (onJobIdReceived) {
+        onJobIdReceived(jobId);
+      }
+      
+      let attempts = 0;
+      const maxAttempts = 30; // 30 seconds timeout
+      
+      while (attempts < maxAttempts) {
+        attempts++;
+        
+        // Wait 1 second between polling attempts
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        try {
+          const statusRes = await fetch(`/api/analyze/status/${jobId}`);
+          const statusData = await statusRes.json();
+          
+          if (!statusData.success && statusData.status === 'failed') {
+            throw new Error(statusData.error || "Analysis failed");
+          }
+          
+          if (statusData.status === 'completed' && statusData.result) {
+            return statusData;
+          }
+        } catch (err) {
+          console.error("Error checking job status:", err);
+          // Continue polling despite errors
+        }
+      }
+      
+      throw new Error("Analysis timed out. Please try again.");
     },
     onSuccess: (data) => {
       if (data.success && data.result) {

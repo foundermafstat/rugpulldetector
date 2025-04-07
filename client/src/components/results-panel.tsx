@@ -3,13 +3,42 @@ import { AnalysisResult } from "@shared/schema";
 import ResultsSummary from "./results-summary";
 import VulnerabilityCard from "./vulnerability-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AnalysisProgress } from "./analysis-progress";
+import { useState, useEffect } from "react";
 
 interface ResultsPanelProps {
   analysisResult: AnalysisResult | null;
   isAnalyzing: boolean;
+  jobId?: string;
 }
 
-export default function ResultsPanel({ analysisResult, isAnalyzing }: ResultsPanelProps) {
+export default function ResultsPanel({ analysisResult, isAnalyzing, jobId }: ResultsPanelProps) {
+  const [progress, setProgress] = useState(0);
+  
+  // Poll for progress updates if we're analyzing and have a jobId
+  useEffect(() => {
+    if (!isAnalyzing || !jobId) return;
+    
+    let isMounted = true;
+    const pollInterval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/analyze/status/${jobId}`);
+        const data = await res.json();
+        
+        if (isMounted && data.success) {
+          setProgress(data.progress || 0);
+        }
+      } catch (err) {
+        console.error("Error polling for analysis progress:", err);
+      }
+    }, 1000);
+    
+    return () => {
+      isMounted = false;
+      clearInterval(pollInterval);
+    };
+  }, [isAnalyzing, jobId]);
+  
   // Show empty state
   if (!isAnalyzing && !analysisResult) {
     return (
@@ -38,7 +67,12 @@ export default function ResultsPanel({ analysisResult, isAnalyzing }: ResultsPan
             <Skeleton className="h-6 w-24 rounded-full" />
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <AnalysisProgress 
+            isAnalyzing={isAnalyzing} 
+            currentProgress={progress} 
+          />
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 my-6">
             {[...Array(4)].map((_, index) => (
               <Skeleton key={index} className="h-16 rounded-md" />
             ))}

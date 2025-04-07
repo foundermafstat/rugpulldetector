@@ -41,30 +41,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Return the job ID immediately
       res.json({ success: true, jobId });
       
-      // Process the contract analysis asynchronously
-      setTimeout(async () => {
+      // Process the contract analysis asynchronously using a proper promise chain
+      // to ensure that all async operations are properly awaited
+      (async () => {
         try {
+          // Update status to analyzing
           analysisJobs.set(jobId, {
             ...analysisJobs.get(jobId)!,
             status: 'analyzing',
             progress: 10
           });
           
-          // Simulate gradual progress - in a real implementation, the analyzer would report progress
-          const progressUpdates = [25, 40, 60, 75, 90];
-          progressUpdates.forEach((progress, index) => {
-            setTimeout(() => {
-              const job = analysisJobs.get(jobId);
-              if (job && job.status === 'analyzing') {
-                analysisJobs.set(jobId, {
-                  ...job,
-                  progress
-                });
-              }
-            }, (index + 1) * 800); // Update progress every 800ms
-          });
+          // Simulate gradual progress updates in a controlled way
+          const updateProgress = (progress: number) => {
+            const job = analysisJobs.get(jobId);
+            if (job && job.status === 'analyzing') {
+              analysisJobs.set(jobId, {
+                ...job,
+                progress
+              });
+            }
+          };
           
-          // Actually analyze the contract
+          // Set up progress updates with proper awaits
+          const progressUpdates = [25, 40, 60, 75, 90];
+          for (let i = 0; i < progressUpdates.length; i++) {
+            await new Promise(resolve => setTimeout(resolve, 800));
+            updateProgress(progressUpdates[i]);
+          }
+          
+          // Now perform the actual contract analysis
           const startTime = Date.now();
           const result = await analyzeContract(input);
           const duration = Date.now() - startTime;
@@ -83,15 +89,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
             progress: 100,
             result: analysisResult
           });
+          
+          console.log(`Analysis job ${jobId} completed successfully`);
         } catch (error) {
-          console.error("Error analyzing contract:", error);
-          analysisJobs.set(jobId, {
-            ...analysisJobs.get(jobId)!,
-            status: 'failed',
-            error: error instanceof Error ? error.message : "Unknown error occurred"
-          });
+          console.error(`Error analyzing contract (job ${jobId}):`, error);
+          
+          // Make sure to handle the error by updating the job status
+          const job = analysisJobs.get(jobId);
+          if (job) {
+            analysisJobs.set(jobId, {
+              ...job,
+              status: 'failed',
+              progress: 0,
+              error: error instanceof Error ? error.message : "Unknown error occurred"
+            });
+          }
         }
-      }, 500);
+      })().catch(err => {
+        console.error(`Unhandled error in analysis job ${jobId}:`, err);
+      });
       
     } catch (error) {
       if (error instanceof ZodError) {
@@ -101,7 +117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      console.error("Error analyzing contract:", error);
+      console.error("Error starting contract analysis:", error);
       return res.status(500).json({ 
         success: false, 
         error: error instanceof Error ? error.message : "Unknown error occurred" 
@@ -123,10 +139,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     if (job.status === 'failed') {
-      return res.json({ success: false, status: job.status, error: job.error });
+      return res.json({ success: false, status: job.status, error: job.error || "Analysis failed" });
     }
     
-    return res.json({ success: true, status: job.status, progress: job.progress });
+    // For pending or analyzing status, return the current progress
+    return res.json({ 
+      success: true, 
+      status: job.status, 
+      progress: job.progress,
+      jobId: job.id
+    });
   });
   
   // Endpoint to get analysis result by ID
