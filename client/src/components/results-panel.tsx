@@ -5,6 +5,7 @@ import VulnerabilityCard from "./vulnerability-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AnalysisProgress } from "./analysis-progress";
 import { PremiumAnalysisOffer } from "./premium-analysis-offer";
+import CodeHealthSparkline from "./code-health-sparkline";
 import { useState, useEffect } from "react";
 
 interface ResultsPanelProps {
@@ -96,6 +97,14 @@ export default function ResultsPanel({ analysisResult, isAnalyzing, jobId }: Res
     return (
       <div className="md:w-1/2">
         <ResultsSummary result={analysisResult} />
+        
+        {/* Code Health Sparkline */}
+        <div className="my-6">
+          <CodeHealthSparkline 
+            contractCode={analysisResult.contractCode}
+            vulnerabilities={analysisResult.vulnerabilities}
+          />
+        </div>
         
         <div className="space-y-4 mt-6">
           {analysisResult.vulnerabilities.map((vulnerability, index) => (
