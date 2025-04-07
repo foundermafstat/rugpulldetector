@@ -21,7 +21,7 @@ export const vulnerabilities = pgTable("vulnerabilities", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description").notNull(),
-  type: text("type").notNull(), // backdoor, privileged, tokenomics
+  type: text("type").notNull(), // backdoor, privileged, tokenomics, phishing, approvals, 2fa, mev
   severity: text("severity").notNull(), // critical, high, medium, low
   lineStart: integer("line_start").notNull(),
   lineEnd: integer("line_end").notNull(),
@@ -67,6 +67,10 @@ export const contractInputSchema = z.object({
     detectBackdoors: z.boolean().default(true),
     detectPrivileged: z.boolean().default(true),
     detectTokenomics: z.boolean().default(true),
+    detectPhishing: z.boolean().default(true),
+    detectApprovals: z.boolean().default(true),
+    detect2FA: z.boolean().default(true),
+    detectMEV: z.boolean().default(true),
     deepScan: z.boolean().default(false)
   }).optional()
 });

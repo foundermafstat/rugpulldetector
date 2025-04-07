@@ -9,6 +9,10 @@ interface AnalysisOptions {
   detectBackdoors: boolean;
   detectPrivileged: boolean;
   detectTokenomics: boolean;
+  detectPhishing: boolean;
+  detectApprovals: boolean;
+  detect2FA: boolean;
+  detectMEV: boolean;
   deepScan: boolean;
 }
 
@@ -16,12 +20,31 @@ export async function analyzeContract(
   input: ContractInput
 ): Promise<Omit<InsertAnalysisResult, "scanTime" | "scanDuration">> {
   const { contractCode, contractName = extractContractName(contractCode) } = input;
-  const options: AnalysisOptions = input.options || {
+  
+  // Define default options
+  const defaultOptions: AnalysisOptions = {
     detectBackdoors: true,
     detectPrivileged: true,
     detectTokenomics: true,
+    detectPhishing: true,
+    detectApprovals: true,
+    detect2FA: true,
+    detectMEV: true,
     deepScan: false
   };
+  
+  // Merge with user provided options if available
+  const options: AnalysisOptions = input.options 
+    ? {
+        ...defaultOptions,
+        ...input.options,
+        // Handle missing new properties that might not be in input.options
+        detectPhishing: input.options.detectPhishing ?? defaultOptions.detectPhishing,
+        detectApprovals: input.options.detectApprovals ?? defaultOptions.detectApprovals,
+        detect2FA: input.options.detect2FA ?? defaultOptions.detect2FA,
+        detectMEV: input.options.detectMEV ?? defaultOptions.detectMEV
+      }
+    : defaultOptions;
   
   // Split the contract into lines for analysis
   const lines = contractCode.split("\n");
@@ -36,6 +59,10 @@ export async function analyzeContract(
       (pattern.type === "backdoor" && !options.detectBackdoors) ||
       (pattern.type === "privileged" && !options.detectPrivileged) ||
       (pattern.type === "tokenomics" && !options.detectTokenomics) ||
+      (pattern.type === "phishing" && !options.detectPhishing) ||
+      (pattern.type === "approvals" && !options.detectApprovals) ||
+      (pattern.type === "2fa" && !options.detect2FA) ||
+      (pattern.type === "mev" && !options.detectMEV) ||
       (pattern.requiresDeepScan && !options.deepScan)
     ) {
       continue;

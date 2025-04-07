@@ -22,6 +22,10 @@ export default function ContractInputPanel({ onAnalysisStart, onAnalysisComplete
     detectBackdoors: true,
     detectPrivileged: true,
     detectTokenomics: true,
+    detectPhishing: true,
+    detectApprovals: true,
+    detect2FA: true,
+    detectMEV: true,
     deepScan: false
   });
   const { toast } = useToast();

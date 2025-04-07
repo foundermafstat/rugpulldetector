@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Documentation from "@/pages/documentation";
+import Detectors from "@/pages/detectors";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -18,6 +19,7 @@ function Router() {
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/documentation" component={Documentation} />
+          <Route path="/detectors" component={Detectors} />
           <Route component={NotFound} />
         </Switch>
       </main>

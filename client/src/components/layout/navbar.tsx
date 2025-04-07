@@ -47,6 +47,9 @@ export default function Navbar() {
           <Link href="/" className="text-sm font-medium transition-colors hover:text-primary">
               Home
           </Link>
+          <Link href="/detectors" className="text-sm font-medium transition-colors hover:text-primary">
+              Detectors
+          </Link>
           <Link href="/documentation" className="text-sm font-medium transition-colors hover:text-primary">
               Documentation
           </Link>
@@ -75,6 +78,9 @@ export default function Navbar() {
           <div className="flex flex-col space-y-3">
             <Link href="/" className="py-2 hover:text-primary">
               Home
+            </Link>
+            <Link href="/detectors" className="py-2 hover:text-primary">
+              Detectors
             </Link>
             <Link href="/documentation" className="py-2 hover:text-primary">
               Documentation
