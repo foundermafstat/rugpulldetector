@@ -7,11 +7,9 @@ export default function Footer() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row justify-between items-start">
           <div className="mb-6 md:mb-0">
-            <Link href="/">
-              <a className="flex items-center space-x-2">
+            <Link href="/" className="flex items-center space-x-2">
                 <ShieldAlert className="h-6 w-6 text-primary" />
                 <span className="font-bold text-lg bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">RugScan</span>
-              </a>
             </Link>
             <p className="text-sm text-muted-foreground mt-2 max-w-xs">
               Secure your blockchain investments by identifying and avoiding contracts with rugpull vulnerabilities.
@@ -22,7 +20,7 @@ export default function Footer() {
             <div>
               <h3 className="text-sm font-semibold mb-3">Resources</h3>
               <ul className="text-sm space-y-2">
-                <li><Link href="/documentation"><a className="text-muted-foreground hover:text-primary transition-colors">Documentation</a></Link></li>
+                <li><Link href="/documentation" className="text-muted-foreground hover:text-primary transition-colors">Documentation</Link></li>
                 <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">API Reference</a></li>
                 <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Security Blog</a></li>
               </ul>

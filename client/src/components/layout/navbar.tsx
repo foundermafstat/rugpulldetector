@@ -36,25 +36,19 @@ export default function Navbar() {
       }`}
     >
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <Link href="/">
-          <a className="flex items-center space-x-2">
+        <Link href="/" className="flex items-center space-x-2">
             <ShieldAlert className="h-8 w-8 text-primary" />
             <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               RugScan
             </h1>
-          </a>
         </Link>
         
         <div className="hidden md:flex items-center space-x-6">
-          <Link href="/">
-            <a className="text-sm font-medium transition-colors hover:text-primary">
+          <Link href="/" className="text-sm font-medium transition-colors hover:text-primary">
               Home
-            </a>
           </Link>
-          <Link href="/documentation">
-            <a className="text-sm font-medium transition-colors hover:text-primary">
+          <Link href="/documentation" className="text-sm font-medium transition-colors hover:text-primary">
               Documentation
-            </a>
           </Link>
           
           <div className="flex items-center space-x-4">
@@ -79,11 +73,11 @@ export default function Navbar() {
       {isMobileMenuOpen && (
         <div className="md:hidden px-4 py-4 border-t">
           <div className="flex flex-col space-y-3">
-            <Link href="/">
-              <a className="py-2 hover:text-primary">Home</a>
+            <Link href="/" className="py-2 hover:text-primary">
+              Home
             </Link>
-            <Link href="/documentation">
-              <a className="py-2 hover:text-primary">Documentation</a>
+            <Link href="/documentation" className="py-2 hover:text-primary">
+              Documentation
             </Link>
             
             <div className="pt-2">
