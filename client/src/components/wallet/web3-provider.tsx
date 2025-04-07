@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { createConfig, WagmiConfig } from 'wagmi'
-import { sepolia } from 'viem/chains'
+import { sepolia as viemSepolia } from 'viem/chains'
+export const sepolia = viemSepolia
 import { createWeb3Modal } from '@web3modal/wagmi/react'
 import { http } from 'viem'
 import { injected } from 'wagmi/connectors'
