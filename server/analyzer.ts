@@ -13,6 +13,7 @@ interface AnalysisOptions {
   detectApprovals: boolean;
   detect2FA: boolean;
   detectMEV: boolean;
+  detectMultisig: boolean;
   deepScan: boolean;
 }
 
@@ -30,6 +31,7 @@ export async function analyzeContract(
     detectApprovals: true,
     detect2FA: true,
     detectMEV: true,
+    detectMultisig: true,
     deepScan: false
   };
   
@@ -42,7 +44,8 @@ export async function analyzeContract(
         detectPhishing: input.options.detectPhishing ?? defaultOptions.detectPhishing,
         detectApprovals: input.options.detectApprovals ?? defaultOptions.detectApprovals,
         detect2FA: input.options.detect2FA ?? defaultOptions.detect2FA,
-        detectMEV: input.options.detectMEV ?? defaultOptions.detectMEV
+        detectMEV: input.options.detectMEV ?? defaultOptions.detectMEV,
+        detectMultisig: input.options.detectMultisig ?? defaultOptions.detectMultisig
       }
     : defaultOptions;
   
@@ -63,6 +66,7 @@ export async function analyzeContract(
       (pattern.type === "approvals" && !options.detectApprovals) ||
       (pattern.type === "2fa" && !options.detect2FA) ||
       (pattern.type === "mev" && !options.detectMEV) ||
+      (pattern.type === "multisig" && !options.detectMultisig) ||
       (pattern.requiresDeepScan && !options.deepScan)
     ) {
       continue;

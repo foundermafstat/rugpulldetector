@@ -6,6 +6,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Documentation from "@/pages/documentation";
 import Detectors from "@/pages/detectors";
+import MultisigProtection from "@/pages/multisig-protection";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -20,6 +21,7 @@ function Router() {
           <Route path="/" component={Home} />
           <Route path="/documentation" component={Documentation} />
           <Route path="/detectors" component={Detectors} />
+          <Route path="/multisig-protection" component={MultisigProtection} />
           <Route component={NotFound} />
         </Switch>
       </main>

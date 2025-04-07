@@ -10,6 +10,7 @@ interface AnalysisOptionsProps {
     detectApprovals: boolean;
     detect2FA: boolean;
     detectMEV: boolean;
+    detectMultisig: boolean;
     deepScan: boolean;
   };
   onChange: (options: {
@@ -20,6 +21,7 @@ interface AnalysisOptionsProps {
     detectApprovals: boolean;
     detect2FA: boolean;
     detectMEV: boolean;
+    detectMultisig: boolean;
     deepScan: boolean;
   }) => void;
 }
@@ -175,6 +177,23 @@ export default function AnalysisOptions({ options, onChange }: AnalysisOptionsPr
               className="ml-2 text-sm text-gray-700"
             >
               Detect MEV vulnerabilities
+            </Label>
+          </div>
+
+          <div className="flex items-center">
+            <Checkbox 
+              id="detectMultisig" 
+              checked={options.detectMultisig}
+              onCheckedChange={(checked) => 
+                handleOptionChange('detectMultisig', checked === true)
+              }
+              className="h-4 w-4 text-primary border-gray-300 rounded"
+            />
+            <Label 
+              htmlFor="detectMultisig" 
+              className="ml-2 text-sm text-gray-700"
+            >
+              Detect multisig vulnerabilities
             </Label>
           </div>
         </div>

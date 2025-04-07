@@ -1,4 +1,4 @@
-import { Shield, AlertTriangle, Key, DollarSign, PhoneCall, Grip, Fingerprint, Zap } from "lucide-react";
+import { Shield, AlertTriangle, Key, DollarSign, PhoneCall, Grip, Fingerprint, Zap, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
@@ -67,6 +67,16 @@ export default function Detectors() {
       examples: ["Front-running vulnerabilities", "Time-dependent execution risks", "Sandwich attack vectors"],
       category: "Advanced",
       color: "bg-pink-100 dark:bg-pink-900/20"
+    },
+    {
+      id: "multisig",
+      name: "Multisig Protection Detector",
+      description: "Enhances security for multisig wallets by detecting unusual signing patterns or unauthorized attempts.",
+      icon: <Users className="h-8 w-8 text-indigo-500" />,
+      examples: ["Missing timelock protection", "Transaction frontrunning vulnerabilities", "Insecure owner management"],
+      category: "Advanced",
+      color: "bg-indigo-100 dark:bg-indigo-900/20",
+      page: "/multisig-protection"
     }
   ];
 
@@ -105,6 +115,13 @@ export default function Detectors() {
                     </ul>
                   </div>
                 </CardContent>
+                {detector.page && (
+                  <CardFooter className="pt-1 pb-3">
+                    <Link href={detector.page} className="text-xs text-primary hover:underline">
+                      View detailed documentation →
+                    </Link>
+                  </CardFooter>
+                )}
               </Card>
             ))}
           </div>
@@ -132,6 +149,13 @@ export default function Detectors() {
                     </ul>
                   </div>
                 </CardContent>
+                {detector.page && (
+                  <CardFooter className="pt-1 pb-3">
+                    <Link href={detector.page} className="text-xs text-primary hover:underline">
+                      View detailed documentation →
+                    </Link>
+                  </CardFooter>
+                )}
               </Card>
             ))}
           </div>

@@ -26,6 +26,7 @@ export default function ContractInputPanel({ onAnalysisStart, onAnalysisComplete
     detectApprovals: true,
     detect2FA: true,
     detectMEV: true,
+    detectMultisig: true,
     deepScan: false
   });
   const { toast } = useToast();
