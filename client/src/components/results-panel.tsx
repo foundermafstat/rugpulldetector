@@ -131,7 +131,7 @@ export default function ResultsPanel({ analysisResult, isAnalyzing, jobId }: Res
               
               {/* Premium Analysis Offer */}
               <div className="mt-6">
-                <PremiumAnalysisOffer />
+                <PremiumAnalysisOffer contractCode={analysisResult.contractCode} />
               </div>
             </>
           )}

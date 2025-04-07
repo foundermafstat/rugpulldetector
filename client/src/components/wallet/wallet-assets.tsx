@@ -1,85 +1,74 @@
-import { useWalletAssets } from "@/hooks/use-wallet-assets";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Wallet, Coins } from "lucide-react";
-import { useAccount, useChainId } from 'wagmi';
-import { holesky, sepolia } from "@/components/wallet/web3-provider"; 
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useWalletAssets, WalletAsset } from '@/hooks/use-wallet-assets';
 
 export function WalletAssets() {
-  const { assets, isLoading, error, networkName } = useWalletAssets();
-  const { isConnected } = useAccount();
-  const chainId = useChainId();
-  
-  // Check if we're on a testnet
-  const isTestnet = chainId === holesky.id || chainId === sepolia.id;
-  
-  if (!isConnected) {
-    return (
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-medium flex items-center">
-            <Wallet className="h-4 w-4 mr-2" />
-            Wallet Assets
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm text-muted-foreground">
-            Connect your wallet to view your assets
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const { assets, isLoading, error, getAssets } = useWalletAssets();
   
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base font-medium flex items-center justify-between">
-          <div className="flex items-center">
-            <Wallet className="h-4 w-4 mr-2" />
-            Wallet Assets
-          </div>
-          <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-            {networkName}
-          </span>
-        </CardTitle>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Wallet Assets</CardTitle>
+        <CardDescription>
+          Your available tokens and balances
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="space-y-2">
-            <Skeleton className="h-5 w-full" />
-            <Skeleton className="h-5 w-4/5" />
-            <Skeleton className="h-5 w-3/5" />
+          <div className="flex justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         ) : error ? (
-          <div className="text-sm text-destructive">{error}</div>
+          <div className="text-center py-6">
+            <p className="text-red-500 mb-4">{error}</p>
+            <Button onClick={getAssets}>Retry</Button>
+          </div>
         ) : assets.length === 0 ? (
-          <div className="text-sm text-muted-foreground">
-            No assets found on this network
+          <div className="text-center py-8">
+            <p className="text-gray-500 mb-4">No assets found in your wallet</p>
+            <Button onClick={getAssets}>Refresh</Button>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {assets.map((asset, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <Coins className="h-4 w-4 mr-2 text-primary" />
-                  <span className="text-sm font-medium">{asset.name}</span>
-                </div>
-                <div className="text-sm">
-                  {asset.formattedBalance} {asset.symbol}
-                </div>
-              </div>
+              <AssetCard key={index} asset={asset} />
             ))}
-            
-            {isTestnet && (
-              <div className="text-xs text-muted-foreground mt-4 bg-muted p-2 rounded">
-                <span className="font-medium">Testnet Notice:</span> These are testnet tokens with no real value.
-                You can get free {networkName} ETH from a faucet.
-              </div>
-            )}
+            <div className="flex justify-center mt-6">
+              <Button variant="outline" onClick={getAssets} size="sm">
+                Refresh
+              </Button>
+            </div>
           </div>
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function AssetCard({ asset }: { asset: WalletAsset }) {
+  return (
+    <div className="flex items-center justify-between p-4 border rounded-lg">
+      <div className="flex items-center space-x-4">
+        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+          {asset.symbol.substring(0, 2)}
+        </div>
+        <div>
+          <h3 className="font-medium">{asset.name}</h3>
+          <p className="text-sm text-gray-500">{asset.symbol}</p>
+        </div>
+      </div>
+      <div className="text-right">
+        <div className="font-medium">{asset.formattedBalance}</div>
+        {asset.value > 0 && (
+          <div className="text-sm text-gray-500">
+            ${asset.value.toLocaleString(undefined, { 
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

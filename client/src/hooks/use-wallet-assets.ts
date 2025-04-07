@@ -1,7 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useAccount, useBalance, useChainId } from 'wagmi';
-import { formatEther } from 'viem';
-import { holesky, sepolia } from '@/components/wallet/web3-provider';
 
 export interface WalletAsset {
   name: string;
@@ -13,69 +10,55 @@ export interface WalletAsset {
 }
 
 export function useWalletAssets() {
-  const { address, isConnected } = useAccount();
-  const chainId = useChainId();
-  const { data: ethBalance, isPending: isLoadingEth } = useBalance({
-    address,
-  });
-
   const [assets, setAssets] = useState<WalletAsset[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Get network name from chainId
-  const getNetworkName = (id: number): string => {
-    if (id === holesky.id) return 'Holesky Testnet';
-    if (id === sepolia.id) return 'Sepolia Testnet';
+  // Mock function to get assets for UI display
+  const getAssets = async () => {
+    setIsLoading(true);
+    setError(null);
     
-    return 'Unknown Network';
+    try {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Mock data
+      setAssets([
+        {
+          name: 'Ethereum',
+          symbol: 'ETH',
+          balance: '500000000000000000',
+          formattedBalance: '0.5 ETH',
+          value: 1250.75,
+          decimals: 18
+        },
+        {
+          name: 'Test Token',
+          symbol: 'TST',
+          balance: '1000000000000000000000',
+          formattedBalance: '1000 TST',
+          value: 500,
+          decimals: 18
+        }
+      ]);
+    } catch (err) {
+      console.error('Error fetching wallet assets:', err);
+      setError('Failed to load wallet assets');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  // Load assets on initial render
   useEffect(() => {
-    if (!isConnected || !address) {
-      setAssets([]);
-      setIsLoading(false);
-      return;
-    }
-
-    const fetchAssets = async () => {
-      setIsLoading(true);
-      setError(null);
-      
-      try {
-        // Start with ETH balance from useBalance hook
-        const assetsList: WalletAsset[] = [];
-        
-        if (ethBalance) {
-          assetsList.push({
-            name: 'Ethereum',
-            symbol: ethBalance.symbol,
-            balance: ethBalance.value.toString(),
-            formattedBalance: ethBalance.formatted,
-            value: 0, // We would need an API to get the current value
-            decimals: ethBalance.decimals,
-          });
-        }
-        
-        // Here you could add logic to fetch ERC20 token balances
-        // and other assets on the connected network
-        
-        setAssets(assetsList);
-      } catch (err) {
-        console.error('Error fetching wallet assets:', err);
-        setError('Failed to load wallet assets');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchAssets();
-  }, [address, isConnected, ethBalance, chainId]);
+    getAssets();
+  }, []);
 
   return {
     assets,
-    isLoading: isLoading || isLoadingEth,
+    isLoading,
     error,
-    networkName: getNetworkName(chainId),
+    getAssets
   };
 }

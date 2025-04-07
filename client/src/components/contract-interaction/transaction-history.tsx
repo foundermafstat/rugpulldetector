@@ -1,76 +1,8 @@
-import { useState, useEffect } from 'react';
-import { useAccount, useReadContract, useChainId } from 'wagmi';
-import { holesky } from '@/components/wallet/web3-provider';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Clock, ExternalLink } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-
-// Contract ABI (simplified for transaction history)
-const contractABI = [
-  // Include only the necessary functions for reading transaction history
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "getUserAnalyses",
-    "outputs": [
-      {
-        "internalType": "uint256[]",
-        "name": "",
-        "type": "uint256[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "analysisId",
-        "type": "uint256"
-      }
-    ],
-    "name": "getAnalysisDetails",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "requester",
-        "type": "address"
-      },
-      {
-        "internalType": "string",
-        "name": "contractHash",
-        "type": "string"
-      },
-      {
-        "internalType": "bool",
-        "name": "deepScan",
-        "type": "bool"
-      },
-      {
-        "internalType": "uint256",
-        "name": "timestamp",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  }
-];
-
-// Smart contract address (same as in payment-contract.tsx)
-const contractAddress = "0x0000000000000000000000000000000000000000";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { contractAddress, contractABI } from './payment-contract';
 
 interface Transaction {
   id: number;
@@ -81,132 +13,109 @@ interface Transaction {
 }
 
 export function TransactionHistory() {
-  const { address, isConnected } = useAccount();
-  const chainId = useChainId();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Read user's analysis IDs from the contract using wagmi v2 API
-  const { data: userAnalysisIds, isPending: isLoadingIds } = useReadContract({
-    address: contractAddress,
-    abi: contractABI,
-    functionName: 'getUserAnalyses',
-    args: address ? [address] : undefined,
-    chainId: holesky.id,
-  });
-
-  // Fetch transaction details when userAnalysisIds changes
-  useEffect(() => {
-    if (!userAnalysisIds || !Array.isArray(userAnalysisIds) || userAnalysisIds.length === 0) {
-      setTransactions([]);
-      return;
-    }
-
-    const fetchTransactionDetails = async () => {
-      setIsLoading(true);
+  // Placeholder function that would be replaced with actual contract interaction
+  const fetchTransactions = async () => {
+    setIsLoading(true);
+    
+    try {
+      // In a real implementation, this would fetch transaction data from the blockchain
+      console.log("Would fetch transactions from contract:", contractAddress);
       
-      try {
-        const txDetails = await Promise.all(
-          userAnalysisIds.map(async (id) => {
-            // This is a mock implementation since we can't actually call the contract
-            // In a real implementation, we would use useContractRead for each ID
-            // or a multicall to batch the requests
-            
-            // Simulating a contract call
-            const details = {
-              id: Number(id),
-              timestamp: Math.floor(Date.now() / 1000) - (Math.random() * 100000), // Random timestamp in the past
-              deepScan: Math.random() > 0.5, // Random boolean
-              amount: Math.random() > 0.5 ? '0.01' : '0.025', // Random amount
-              contractHash: `contract_${id}_hash`, // Fake hash
-            };
-            
-            return details;
-          })
-        );
+      // Mock data for UI display
+      setTimeout(() => {
+        const mockTransactions: Transaction[] = [
+          {
+            id: 1,
+            timestamp: Date.now() - 3600000, // 1 hour ago
+            deepScan: false,
+            amount: "0.01",
+            contractHash: "0x1234...5678"
+          },
+          {
+            id: 2,
+            timestamp: Date.now() - 7200000, // 2 hours ago
+            deepScan: true,
+            amount: "0.05",
+            contractHash: "0x9876...5432"
+          }
+        ];
         
-        // Sort transactions by timestamp (newest first)
-        const sortedTxs = txDetails.sort((a, b) => b.timestamp - a.timestamp);
-        setTransactions(sortedTxs);
-      } catch (error) {
-        console.error('Error fetching transaction details:', error);
-      } finally {
+        setTransactions(mockTransactions);
         setIsLoading(false);
-      }
-    };
+      }, 1000);
+      
+    } catch (error) {
+      console.error("Error fetching transaction history:", error);
+      setIsLoading(false);
+    }
+  };
 
-    fetchTransactionDetails();
-  }, [userAnalysisIds]);
+  // Helper function to format timestamps
+  const formatTimestamp = (timestamp: number) => {
+    const date = new Date(timestamp);
+    return date.toLocaleString();
+  };
 
-  if (!isConnected) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Transaction History</CardTitle>
-          <CardDescription>
-            Your premium analysis payment history
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm text-muted-foreground">
-            Connect your wallet to view your transaction history
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  // Helper function to format contract hash
+  const formatContractHash = (hash: string) => {
+    if (hash.length <= 13) return hash;
+    return `${hash.substring(0, 6)}...${hash.substring(hash.length - 4)}`;
+  };
+
+  // Fetch transactions when component mounts
+  React.useEffect(() => {
+    fetchTransactions();
+  }, []);
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-lg">Transaction History</CardTitle>
+        <CardTitle>Transaction History</CardTitle>
         <CardDescription>
-          Your premium analysis payment history
+          Recent payments for contract analysis services
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {isLoading || isLoadingIds ? (
-          <div className="space-y-2">
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-12 w-full" />
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         ) : transactions.length === 0 ? (
-          <div className="text-sm text-muted-foreground">
-            No transactions found. Purchase a premium analysis to see your history.
+          <div className="text-center py-8 text-muted-foreground">
+            No transaction history found
           </div>
         ) : (
-          <div className="space-y-2">
-            {transactions.map((tx) => (
-              <div 
-                key={tx.id} 
-                className="flex items-center justify-between p-3 border rounded-md hover:bg-muted transition-colors"
-              >
-                <div className="flex flex-col">
-                  <div className="flex items-center">
-                    <span className="text-sm font-medium">
-                      {tx.deepScan ? 'Deep Analysis' : 'Standard Analysis'}
-                    </span>
-                    <span className="ml-2 text-xs px-1.5 py-0.5 rounded bg-primary/10 text-primary">
-                      {tx.amount} ETH
-                    </span>
-                  </div>
-                  <div className="flex items-center text-xs text-muted-foreground mt-0.5">
-                    <Clock className="h-3 w-3 mr-1" />
-                    {formatDistanceToNow(new Date(tx.timestamp * 1000), { addSuffix: true })}
-                  </div>
-                </div>
-                <a 
-                  href={`https://holesky.etherscan.io/tx/0x${tx.id.toString(16).padStart(64, '0')}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-primary hover:text-primary/80"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </a>
-              </div>
-            ))}
-          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Time</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Contract</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {transactions.map((tx) => (
+                <TableRow key={tx.id}>
+                  <TableCell>{tx.id}</TableCell>
+                  <TableCell>{formatTimestamp(tx.timestamp)}</TableCell>
+                  <TableCell>
+                    <Badge variant={tx.deepScan ? "default" : "outline"}>
+                      {tx.deepScan ? "Deep Scan" : "Standard"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{tx.amount} ETH</TableCell>
+                  <TableCell className="font-mono text-xs">
+                    {formatContractHash(tx.contractHash)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
       </CardContent>
     </Card>
