@@ -4,6 +4,7 @@ import ResultsSummary from "./results-summary";
 import VulnerabilityCard from "./vulnerability-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AnalysisProgress } from "./analysis-progress";
+import { PremiumAnalysisOffer } from "./premium-analysis-offer";
 import { useState, useEffect } from "react";
 
 interface ResultsPanelProps {
@@ -106,26 +107,33 @@ export default function ResultsPanel({ analysisResult, isAnalyzing, jobId }: Res
           ))}
           
           {analysisResult.vulnerabilities.length === 0 && (
-            <div className="bg-white rounded-lg shadow-md p-6 text-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-16 w-16 mx-auto text-success"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <h3 className="mt-4 text-lg font-medium text-gray-900">No Vulnerabilities Detected</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                The contract appears to be free of the rugpull vulnerabilities we scan for
-              </p>
-            </div>
+            <>
+              <div className="bg-white rounded-lg shadow-md p-6 text-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-16 w-16 mx-auto text-success"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <h3 className="mt-4 text-lg font-medium text-gray-900">No Vulnerabilities Detected</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  The contract appears to be free of the rugpull vulnerabilities we scan for
+                </p>
+              </div>
+              
+              {/* Premium Analysis Offer */}
+              <div className="mt-6">
+                <PremiumAnalysisOffer />
+              </div>
+            </>
           )}
         </div>
       </div>
