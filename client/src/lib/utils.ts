@@ -69,12 +69,16 @@ export function getVulnerabilityTypeIcon(type: string) {
 // Returns color based on overall risk level
 export function getRiskLevelColor(riskLevel: string) {
   switch (riskLevel.toLowerCase()) {
+    case 'critical':
+      return 'text-white bg-red-500';
     case 'high':
-      return 'text-secondary bg-red-100';
+      return 'text-white bg-orange-500';
     case 'medium':
-      return 'text-yellow-600 bg-yellow-100';
+      return 'text-yellow-800 bg-yellow-200';
     case 'low':
-      return 'text-success bg-green-100';
+      return 'text-green-800 bg-green-100';
+    case 'safe':
+      return 'text-blue-800 bg-blue-100';
     default:
       return 'text-gray-600 bg-gray-100';
   }

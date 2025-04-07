@@ -104,4 +104,59 @@
   .modal-backdrop {
     @apply fixed inset-0 bg-black/50 backdrop-blur-sm z-40;
   }
+  
+  /* Risk meter animations */
+  .risk-meter-gauge {
+    @apply h-8 rounded-full overflow-hidden relative transition-all duration-500;
+  }
+  
+  .risk-meter-needle {
+    @apply absolute top-0 bottom-0 w-0.5 bg-black z-10 transition-all duration-1000 ease-out;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+  }
+  
+  .risk-meter-needle::before {
+    content: '';
+    @apply absolute -top-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-black rounded-full;
+  }
+  
+  .risk-meter-background {
+    @apply absolute inset-0 bg-gradient-to-r from-green-500 via-yellow-500 to-red-500;
+  }
+  
+  .risk-meter-mask {
+    @apply absolute inset-0 transition-all duration-1000 ease-out;
+    background-image: linear-gradient(to right, transparent, white);
+  }
+  
+  /* Counter animations for risk meter */
+  .counter-animate-in {
+    animation: counterFadeIn 0.3s ease-out forwards;
+  }
+  
+  .counter-animate-out {
+    animation: counterFadeOut 0.2s ease-in forwards;
+  }
+  
+  @keyframes counterFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes counterFadeOut {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(5px);
+    }
+  }
 }
