@@ -1,4 +1,4 @@
-# Smart Contract Vulnerability Scanner
+# RugPull Detector - Smart Contract Vulnerability Scanner
 
 A comprehensive web application for smart contract security analysis, focusing on detecting and preventing potential rugpull vulnerabilities in blockchain projects.
 
